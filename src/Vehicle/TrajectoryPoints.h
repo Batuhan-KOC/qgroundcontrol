@@ -26,6 +26,7 @@ public:
 
     void start  (void);
     void stop   (void);
+    void addCoordinate(QGeoCoordinate coordinate);
 
 public slots:
     void clear  (void);

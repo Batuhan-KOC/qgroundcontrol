@@ -94,6 +94,7 @@ Vehicle::Vehicle(LinkInterface*             link,
     , _firmwarePluginManager        (firmwarePluginManager)
     , _joystickManager              (joystickManager)
     , _trajectoryPoints             (new TrajectoryPoints(this, this))
+    , _trajectoryPointsVanav        (new TrajectoryPoints(this, this))
     , _mavlinkStreamConfig          (std::bind(&Vehicle::_setMessageInterval, this, std::placeholders::_1, std::placeholders::_2))
     , _vehicleFactGroup             (this)
     , _gpsFactGroup                 (this)
@@ -218,6 +219,7 @@ Vehicle::Vehicle(MAV_AUTOPILOT              firmwareType,
     , _capabilityBits                   (MAV_PROTOCOL_CAPABILITY_MISSION_FENCE | MAV_PROTOCOL_CAPABILITY_MISSION_RALLY)
     , _firmwarePluginManager            (firmwarePluginManager)
     , _trajectoryPoints                 (new TrajectoryPoints(this, this))
+    , _trajectoryPointsVanav            (new TrajectoryPoints(this, this))
     , _mavlinkStreamConfig              (std::bind(&Vehicle::_setMessageInterval, this, std::placeholders::_1, std::placeholders::_2))
     , _vehicleFactGroup                 (this)
     , _gpsFactGroup                     (this)
@@ -288,6 +290,8 @@ void Vehicle::_commonInit()
 
     connect(_missionManager, &MissionManager::sendComplete,             _trajectoryPoints, &TrajectoryPoints::clear);
     connect(_missionManager, &MissionManager::newMissionItemsAvailable, _trajectoryPoints, &TrajectoryPoints::clear);
+    connect(_missionManager, &MissionManager::sendComplete,             _trajectoryPointsVanav, &TrajectoryPoints::clear);
+    connect(_missionManager, &MissionManager::newMissionItemsAvailable, _trajectoryPointsVanav, &TrajectoryPoints::clear);
 
     _standardModes                  = new StandardModes                 (this, this);
     _componentInformationManager    = new ComponentInformationManager   (this);
@@ -481,7 +485,11 @@ void Vehicle::_mavlinkMessageReceived(LinkInterface* link, mavlink_message_t mes
 
     if (message.sysid != _id && message.sysid != 0) {
         // We allow RADIO_STATUS messages which come from a link the vehicle is using to pass through and be handled
-        if (!(message.msgid == MAVLINK_MSG_ID_RADIO_STATUS && _vehicleLinkManager->containsLink(link))) {
+        if(message.sysid == 255 && message.msgid == 232){ // VANAV injected but not accepted gps input
+            _handleGpsVanavInt(message);
+            return;
+        }
+        else if (!(message.msgid == MAVLINK_MSG_ID_RADIO_STATUS && _vehicleLinkManager->containsLink(link))) {
             return;
         }
     }
@@ -758,6 +766,22 @@ void Vehicle::_handleGpsRawInt(mavlink_message_t& message)
             }
         }
     }
+}
+
+
+void Vehicle::_handleGpsVanavInt(mavlink_message_t &_message)
+{
+    int32_t latitudeRaw     = _MAV_RETURN_int32_t(&_message,  12);
+    int32_t longitudeRaw    = _MAV_RETURN_int32_t(&_message,  16);
+    int32_t altitudeRaw     = _MAV_RETURN_int32_t(&_message,  20);
+
+    double latitude     = static_cast<double>(latitudeRaw)   / 1E7;    // Degree
+    double longitude    = static_cast<double>(longitudeRaw)  / 1E7;    // Degree
+    double altitude     = static_cast<double>(altitudeRaw)   / 1E3;    // Meter
+
+    QGeoCoordinate newVanavCoordinate(latitude, longitude, altitude);
+
+    _trajectoryPointsVanav->addCoordinate(newVanavCoordinate);
 }
 
 // TODO: VehicleFactGroup
@@ -1117,12 +1141,14 @@ void Vehicle::_updateArmed(bool armed)
         // We are transitioning to the armed state, begin tracking trajectory points for the map
         if (_armed) {
             _trajectoryPoints->start();
+            _trajectoryPointsVanav->start();
             _flightTimerStart();
             _clearCameraTriggerPoints();
             // Reset battery warning
             _lowestBatteryChargeStateAnnouncedMap.clear();
         } else {
             _trajectoryPoints->stop();
+            _trajectoryPointsVanav->stop();
             _flightTimerStop();
             // Also handle Video Streaming
             if(_settingsManager->videoSettings()->disableWhenDisarmed()->rawValue().toBool()) {

@@ -62,6 +62,11 @@ void TrajectoryPoints::stop(void)
     disconnect(_vehicle, &Vehicle::coordinateChanged, this, &TrajectoryPoints::_vehicleCoordinateChanged);
 }
 
+void TrajectoryPoints::addCoordinate(QGeoCoordinate coordinate)
+{
+    _vehicleCoordinateChanged(coordinate);
+}
+
 void TrajectoryPoints::clear(void)
 {
     _points.clear();
