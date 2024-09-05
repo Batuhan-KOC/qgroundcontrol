@@ -40,6 +40,7 @@ Item {
     readonly property string takeoffTitle:                  qsTr("Takeoff")
     readonly property string gripperTitle:                  qsTr("Gripper Function")
     readonly property string landTitle:                     qsTr("Land")
+    readonly property string vanavClearPathTitle:           qsTr("Clear")
     readonly property string startMissionTitle:             qsTr("Start Mission")
     readonly property string mvStartMissionTitle:           qsTr("Start Mission (MV)")
     readonly property string continueMissionTitle:          qsTr("Continue Mission")
@@ -70,6 +71,7 @@ Item {
     readonly property string continueMissionMessage:            qsTr("Continue the mission from the current waypoint.")
     readonly property string resumeMissionUploadFailMessage:    qsTr("Upload of resume mission failed. Confirm to retry upload")
     readonly property string landMessage:                       qsTr("Land the vehicle at the current position.")
+    readonly property string vanavClearPathMessage:             qsTr("Clear vanav gps source path.")
     readonly property string rtlMessage:                        qsTr("Return to the launch position of the vehicle.")
     readonly property string changeAltMessage:                  qsTr("Change the altitude of the vehicle up or down.")
     readonly property string changeCruiseSpeedMessage:          qsTr("Change the maximum horizontal cruise speed.")
@@ -116,6 +118,7 @@ Item {
     readonly property int actionSetHome:                    27
     readonly property int actionSetEstimatorOrigin:         28
     readonly property int actionSetFlightMode:              29
+    readonly property int actionVanavClearPath:             30
   
     property var    _activeVehicle:             QGroundControl.multiVehicleManager.activeVehicle
     property var    _flyViewSettings:           QGroundControl.settingsManager.flyViewSettings
@@ -543,6 +546,11 @@ Item {
         case actionSetFlightMode:
             confirmDialog.title = setFlightMode
             confirmDialog.message = setFlightModeMessage
+            break
+        case actionVanavClearPath:
+            if(_activeVehicle){
+                _activeVehicle.trajectoryPointsVanav.clear();
+            }
             break
         default:
             console.warn("Unknown actionCode", actionCode)

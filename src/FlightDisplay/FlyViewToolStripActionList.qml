@@ -56,6 +56,7 @@ ToolStripActionList {
         GuidedActionTakeoff { },
         GuidedActionLand { },
         GuidedActionRTL { },
+        VanavClearPath { },
         GuidedActionPause { },
         GuidedActionActionList { },
         GuidedActionGripper { }
