@@ -60,6 +60,8 @@
         <file alias="GripperGrab.svg">resources/GripperGrab.svg</file>
         <file>resources/icons/qgroundcontrol.ico</file>
         <file alias="clearPath.svg">resources/clearPath.svg</file>
+        <file alias="vanavOff.svg">resources/vanavOff.svg</file>
+        <file alias="vanavOn.svg">resources/vanavOn.svg</file>
     </qresource>
     <qresource prefix="/res/firmware">
         <file alias="3drradio.png">resources/firmware/3drradio.png</file>

@@ -148,6 +148,7 @@ public:
     /// @brief Perform initialize which is common to both normal application running and unit tests.
     void init();
     void shutdown();
+    QObject* rootQmlObject();
 
     // Although public, these methods are internal and should only be called by UnitTest code
     QQmlApplicationEngine* qmlAppEngine() { return _qmlAppEngine; }

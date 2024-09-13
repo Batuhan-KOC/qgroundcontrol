@@ -349,6 +349,8 @@
         <file alias="Viewer3D/Models3D/Viewer3DVehicleItems.qml">src/Viewer3D/Viewer3DQml/Models3D/Viewer3DVehicleItems.qml</file>
         <file alias="Viewer3D/Viewer3DProgressBar.qml">src/Viewer3D/Viewer3DQml/Viewer3DProgressBar.qml</file>
         <file alias="QGroundControl/FlightDisplay/VanavClearPath.qml">src/FlightDisplay/VanavClearPath.qml</file>
+        <file alias="QGroundControl/FlightDisplay/VanavOn.qml">src/FlightDisplay/VanavOn.qml</file>
+        <file alias="QGroundControl/FlightDisplay/VanavOff.qml">src/FlightDisplay/VanavOff.qml</file>
     </qresource>
     <qresource prefix="/FirstRunPromptDialogs">
         <file alias="UnitsFirstRunPrompt.qml">src/FirstRunPromptDialogs/UnitsFirstRunPrompt.qml</file>

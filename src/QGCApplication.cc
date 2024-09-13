@@ -884,6 +884,14 @@ void QGCApplication::shutdown()
     delete _qmlAppEngine;
 }
 
+QObject *QGCApplication::rootQmlObject()
+{
+    if (_qmlAppEngine && _qmlAppEngine->rootObjects().size()) {
+        return _qmlAppEngine->rootObjects()[0];
+    }
+    return nullptr;
+}
+
 QString QGCApplication::numberToString(quint64 number)
 {
     return getCurrentLanguage().toString(number);

@@ -20,6 +20,8 @@ GuidedActionConfirm             1.0 GuidedActionConfirm.qml
 GuidedActionsController         1.0 GuidedActionsController.qml
 GuidedActionLand                1.0 GuidedActionLand.qml
 VanavClearPath                  1.0 VanavClearPath.qml
+VanavOn                         1.0 VanavOn.qml
+VanavOff                        1.0 VanavOff.qml
 GuidedActionList                1.0 GuidedActionList.qml
 GuidedActionPause               1.0 GuidedActionPause.qml
 GuidedActionRTL                 1.0 GuidedActionRTL.qml

@@ -70,6 +70,7 @@ QGC_LOGGING_CATEGORY(VehicleLog, "VehicleLog")
 #define DEFAULT_LON -120.083923f
 #define SET_HOME_TERRAIN_ALT_MAX 10000
 #define SET_HOME_TERRAIN_ALT_MIN -500
+#define MAVLINK_MSG_ID_VANAV_ON_OFF_STATUS 513
 
 const QString guided_mode_not_supported_by_vehicle = QObject::tr("Guided mode not supported by Vehicle.");
 
@@ -94,7 +95,7 @@ Vehicle::Vehicle(LinkInterface*             link,
     , _firmwarePluginManager        (firmwarePluginManager)
     , _joystickManager              (joystickManager)
     , _trajectoryPoints             (new TrajectoryPoints(this, this))
-    , _trajectoryPointsVanav        (new TrajectoryPoints(this, this))
+    , _trajectoryPointsVanav        (new TrajectoryPoints(this, this, true))
     , _mavlinkStreamConfig          (std::bind(&Vehicle::_setMessageInterval, this, std::placeholders::_1, std::placeholders::_2))
     , _vehicleFactGroup             (this)
     , _gpsFactGroup                 (this)
@@ -670,6 +671,11 @@ void Vehicle::_mavlinkMessageReceived(LinkInterface* link, mavlink_message_t mes
         mavlink_log_data_t log;
         mavlink_msg_log_data_decode(&message, &log);
         emit logData(log.ofs, log.id, log.count, log.data);
+        break;
+    }
+    case MAVLINK_MSG_ID_VANAV_ON_OFF_STATUS:
+    {
+        _handleVanavOnOffStatus(message);
         break;
     }
     case MAVLINK_MSG_ID_MESSAGE_INTERVAL:
@@ -3683,6 +3689,20 @@ void Vehicle::_altitudeAboveTerrainReceived(bool success, QList<double> heights)
     _altitudeAboveTerrTerrainAtCoordinateQuery = nullptr;
 }
 
+void Vehicle::_setVanavOnOffVisiblity(bool isActive)
+{
+    QObject* offButton = qApp->rootQmlObject()->findChild<QObject*>("vanavOffButton");
+    QObject* onButton = qApp->rootQmlObject()->findChild<QObject*>("vanavOnButton");
+
+    if(offButton != nullptr){
+        offButton->setProperty("visible", !isActive);
+    }
+
+    if(onButton != nullptr){
+        onButton->setProperty("visible", isActive);
+    }
+}
+
 void Vehicle::_handleObstacleDistance(const mavlink_message_t& message)
 {
     mavlink_obstacle_distance_t o;
@@ -3725,6 +3745,24 @@ void Vehicle::_handleFenceStatus(const mavlink_message_t& message)
     } else {
         lastUpdate = now;
     }
+}
+
+void Vehicle::_handleVanavOnOffStatus(const mavlink_message_t &message)
+{
+    uint8_t vanavOnOffValue = _MAV_RETURN_uint8_t(&message,  0);
+
+    if(vanavOnOffValue == 0){
+        _vanavOnOffStatus = false;
+
+        emit vanavOnOffStatusChanged(_vanavOnOffStatus);
+    }
+    else{
+        _vanavOnOffStatus = true;
+
+        emit vanavOnOffStatusChanged(_vanavOnOffStatus);
+    }
+
+    _setVanavOnOffVisiblity(_vanavOnOffStatus);
 }
 
 void Vehicle::updateFlightDistance(double distance)
@@ -4099,3 +4137,81 @@ void Vehicle::sendSetupSigning()
 }
 
 /*---------------------------------------------------------------------------*/
+
+void Vehicle::vanavOnPressed()
+{
+    emit vanavOnOffStatusChanged(false);
+
+    SharedLinkInterfacePtr sharedLink = this->vehicleLinkManager()->primaryLink().lock();
+    if (!sharedLink) {
+        return;
+    }
+
+    /*
+     * <message id="512" name="VANAV_SET_ON_OFF"> <!-- CRC EXTRA = 40 -->
+     *    <description>Set vanav on or off</description>
+     *    <field type="uint8_t" name="onoff">Vanav On(1) Off(0) set value</field>
+     *  </message>
+    */
+    mavlink_message_t       message;
+    int __systemId = _mavlink->getSystemId();
+    int __componentId = _mavlink->getComponentId();
+    uint8_t __mavlinkChannel = sharedLink->mavlinkChannel();
+
+    // vanav on off switch message size is only 1 byte
+    char buf[1];
+    _mav_put_int8_t(buf, 0, 1);
+
+    memcpy(_MAV_PAYLOAD_NON_CONST(&message), buf, 1);
+
+    message.msgid = 512;
+
+    mavlink_finalize_message_chan(&message,
+                                  __systemId,
+                                  __componentId,
+                                  __mavlinkChannel,
+                                  1,
+                                  1,
+                                  41);
+
+    sendMessageOnLinkThreadSafe(sharedLink.get(), message);
+}
+
+void Vehicle::vanavOffPressed()
+{
+    emit vanavOnOffStatusChanged(false);
+
+    SharedLinkInterfacePtr sharedLink = this->vehicleLinkManager()->primaryLink().lock();
+    if (!sharedLink) {
+        return;
+    }
+
+    /*
+     * <message id="512" name="VANAV_SET_ON_OFF"> <!-- CRC EXTRA = 40 -->
+     *    <description>Set vanav on or off</description>
+     *    <field type="uint8_t" name="onoff">Vanav On(1) Off(0) set value</field>
+     *  </message>
+    */
+    mavlink_message_t       message;
+    int __systemId = _mavlink->getSystemId();
+    int __componentId = _mavlink->getComponentId();
+    uint8_t __mavlinkChannel = sharedLink->mavlinkChannel();
+
+    // vanav on off switch message size is only 1 byte
+    char buf[1];
+    _mav_put_int8_t(buf, 0, 1);
+
+    memcpy(_MAV_PAYLOAD_NON_CONST(&message), buf, 1);
+
+    message.msgid = 512;
+
+    mavlink_finalize_message_chan(&message,
+                                  __systemId,
+                                  __componentId,
+                                  __mavlinkChannel,
+                                  1,
+                                  1,
+                                  41);
+
+    sendMessageOnLinkThreadSafe(sharedLink.get(), message);
+}

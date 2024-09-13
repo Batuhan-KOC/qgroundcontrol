@@ -20,7 +20,7 @@ class TrajectoryPoints : public QObject
     Q_OBJECT
 
 public:
-    TrajectoryPoints(Vehicle* vehicle, QObject* parent = nullptr);
+    TrajectoryPoints(Vehicle* vehicle, QObject* parent = nullptr, bool isVanav = false);
 
     Q_INVOKABLE QVariantList list(void) const { return _points; }
 
@@ -44,6 +44,7 @@ private:
     QVariantList    _points;
     QGeoCoordinate  _lastPoint;
     double          _lastAzimuth;
+    bool _isVanav;
 
     static constexpr double _distanceTolerance = 2.0;
     static constexpr double _azimuthTolerance = 1.5;
