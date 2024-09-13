@@ -4160,7 +4160,7 @@ void Vehicle::vanavOnPressed()
 
     // vanav on off switch message size is only 1 byte
     char buf[1];
-    _mav_put_int8_t(buf, 0, 1);
+    _mav_put_int8_t(buf, 0, 0);
 
     memcpy(_MAV_PAYLOAD_NON_CONST(&message), buf, 1);
 
@@ -4172,7 +4172,7 @@ void Vehicle::vanavOnPressed()
                                   __mavlinkChannel,
                                   1,
                                   1,
-                                  41);
+                                  0);
 
     sendMessageOnLinkThreadSafe(sharedLink.get(), message);
 }
@@ -4211,7 +4211,7 @@ void Vehicle::vanavOffPressed()
                                   __mavlinkChannel,
                                   1,
                                   1,
-                                  41);
+                                  0);
 
     sendMessageOnLinkThreadSafe(sharedLink.get(), message);
 }
