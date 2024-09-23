@@ -76,6 +76,7 @@ signals:
     void messageCountChanged(uint32_t newCount);
     void messageTypeChanged();
     void newErrorMessage(QString message);
+    void vanavIsOn(bool on);
 
 private slots:
     void _chunkedStatusTextTimeout();

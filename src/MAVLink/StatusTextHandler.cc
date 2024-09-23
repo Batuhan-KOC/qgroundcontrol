@@ -130,6 +130,13 @@ void StatusTextHandler::resetErrorLevelMessages()
 
 void StatusTextHandler::handleTextMessage(MAV_COMPONENT compId, MAV_SEVERITY severity, const QString &text, const QString &description)
 {
+    if(text == "VANAV IS OFF"){
+        emit vanavIsOn(false);
+    }
+    else if(text == "VANAV IS ON"){
+        emit vanavIsOn(true);
+    }
+
     QString htmlText(text);
     (void) htmlText.replace("\n", "<br/>");
 

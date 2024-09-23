@@ -558,12 +558,20 @@ Item {
             break
         case actionVanavOn:
             if(_activeVehicle){
+                console.warn("Sending vanav close message")
                 _activeVehicle.vanavOnPressed();
+            }
+            else{
+                console.warn("Active vehicle not exist")
             }
             break
         case actionVanavOff:
             if(_activeVehicle){
+                console.warn("Sending vanav open message")
                 _activeVehicle.vanavOffPressed();
+            }
+            else{
+                console.warn("Active vehicle not exist")
             }
             break
         default:

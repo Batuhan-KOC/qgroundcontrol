@@ -124,6 +124,8 @@ public:
             JoystickManager*        joystickManager,
             QObject*                parent = nullptr);
 
+    void _handleVanavOnOffStatusPublic        (bool on);
+
     // Pass these into the offline constructor to create an offline vehicle which tracks the offline vehicle settings
     static const MAV_AUTOPILOT    MAV_AUTOPILOT_TRACK = static_cast<MAV_AUTOPILOT>(-1);
     static const MAV_TYPE         MAV_TYPE_TRACK = static_cast<MAV_TYPE>(-1);
@@ -1369,6 +1371,7 @@ signals:
 private slots:
     void _textMessageReceived(MAV_COMPONENT componentid, MAV_SEVERITY severity, QString text, QString description);
     void _errorMessageReceived(QString message);
+    void _vanavIsOn(bool on);
 
 private:
     void _createStatusTextHandler();

@@ -3762,7 +3762,11 @@ void Vehicle::_handleVanavOnOffStatus(const mavlink_message_t &message)
         emit vanavOnOffStatusChanged(_vanavOnOffStatus);
     }
 
-    _setVanavOnOffVisiblity(_vanavOnOffStatus);
+    //_setVanavOnOffVisiblity(_vanavOnOffStatus);
+}
+
+void Vehicle::_handleVanavOnOffStatusPublic        (bool on){
+    _setVanavOnOffVisiblity(on);
 }
 
 void Vehicle::updateFlightDistance(double distance)
@@ -4050,6 +4054,7 @@ void Vehicle::_createStatusTextHandler()
     (void) connect(m_statusTextHandler, &StatusTextHandler::newFormattedMessage, this, &Vehicle::newFormattedMessage);
     (void) connect(m_statusTextHandler, &StatusTextHandler::textMessageReceived, this, &Vehicle::_textMessageReceived);
     (void) connect(m_statusTextHandler, &StatusTextHandler::newErrorMessage, this, &Vehicle::_errorMessageReceived);
+    (void) connect(m_statusTextHandler, &StatusTextHandler::vanavIsOn, this, &Vehicle::_vanavIsOn);
 }
 
 void Vehicle::_textMessageReceived(MAV_COMPONENT componentid, MAV_SEVERITY severity, QString text, QString description)
@@ -4101,6 +4106,13 @@ void Vehicle::_errorMessageReceived(QString message)
 {
     if (_isActiveVehicle) {
         qgcApp()->showCriticalVehicleMessage(message);
+    }
+}
+
+void Vehicle::_vanavIsOn(bool on)
+{
+    if(_isActiveVehicle){
+        _setVanavOnOffVisiblity(on);
     }
 }
 
@@ -4205,7 +4217,7 @@ void Vehicle::vanavOffPressed()
 
     message.msgid = 512;
 
-    mavlink_finalize_message_chan(&message,
+    uint16_t ms = mavlink_finalize_message_chan(&message,
                                   __systemId,
                                   __componentId,
                                   __mavlinkChannel,
