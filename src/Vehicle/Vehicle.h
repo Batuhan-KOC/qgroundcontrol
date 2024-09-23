@@ -464,6 +464,8 @@ public:
     /// @return true: message sent, false: Link no longer connected
     bool sendMessageOnLinkThreadSafe(LinkInterface* link, mavlink_message_t message);
 
+    bool sendVanavMessageOnLinkThreadSafe(LinkInterface* link, bool on);
+
     /// Sends the specified messages multiple times to the vehicle in order to attempt to
     /// guarantee that it makes it to the vehicle.
     void sendMessageMultiple(mavlink_message_t message);

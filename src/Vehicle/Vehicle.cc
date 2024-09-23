@@ -1520,6 +1520,38 @@ bool Vehicle::sendMessageOnLinkThreadSafe(LinkInterface* link, mavlink_message_t
     return true;
 }
 
+bool Vehicle::sendVanavMessageOnLinkThreadSafe(LinkInterface* link, bool on){
+    if (!link->isConnected()) {
+        qCDebug(VehicleLog) << "sendMessageOnLinkThreadSafe" << link << "not connected!";
+        return false;
+    }
+    /*
+     * 012345678
+     * SETVANONN
+     * SETVANOFF
+    */
+    // Write message into buffer, prepending start sign
+    uint8_t buffer[9]{'S', 'E', 'T', 'V', 'A', 'N', 'V', ' ', ' '};
+
+    if(on){
+        buffer[6] = 'O';
+        buffer[7] = 'N';
+        buffer[8] = 'N';
+    }
+    else{
+        buffer[6] = 'O';
+        buffer[7] = 'F';
+        buffer[8] = 'F';
+    }
+
+    link->writeBytesThreadSafe((const char*)buffer, 9);
+
+    _messagesSent++;
+    emit messagesSentChanged();
+
+    return true;
+}
+
 int Vehicle::motorCount()
 {
     uint8_t frameType = 0;
@@ -4165,28 +4197,30 @@ void Vehicle::vanavOnPressed()
      *    <field type="uint8_t" name="onoff">Vanav On(1) Off(0) set value</field>
      *  </message>
     */
-    mavlink_message_t       message;
-    int __systemId = _mavlink->getSystemId();
-    int __componentId = _mavlink->getComponentId();
-    uint8_t __mavlinkChannel = sharedLink->mavlinkChannel();
+    //mavlink_message_t       message;
+    //int __systemId = _mavlink->getSystemId();
+    //int __componentId = _mavlink->getComponentId();
+    //uint8_t __mavlinkChannel = sharedLink->mavlinkChannel();
 
-    // vanav on off switch message size is only 1 byte
-    char buf[1];
-    _mav_put_int8_t(buf, 0, 0);
+    //// vanav on off switch message size is only 1 byte
+    //char buf[1];
+    //_mav_put_int8_t(buf, 0, 0);
 
-    memcpy(_MAV_PAYLOAD_NON_CONST(&message), buf, 1);
+    //memcpy(_MAV_PAYLOAD_NON_CONST(&message), buf, 1);
 
-    message.msgid = 512;
+    //message.msgid = 512;
 
-    mavlink_finalize_message_chan(&message,
-                                  __systemId,
-                                  __componentId,
-                                  __mavlinkChannel,
-                                  1,
-                                  1,
-                                  0);
+    //mavlink_finalize_message_chan(&message,
+    //                              __systemId,
+    //                              __componentId,
+    //                              __mavlinkChannel,
+    //                              1,
+    //                              1,
+    //                              0);
 
-    sendMessageOnLinkThreadSafe(sharedLink.get(), message);
+    //sendMessageOnLinkThreadSafe(sharedLink.get(), message);
+
+    sendVanavMessageOnLinkThreadSafe(sharedLink.get(), false);
 }
 
 void Vehicle::vanavOffPressed()
@@ -4204,26 +4238,28 @@ void Vehicle::vanavOffPressed()
      *    <field type="uint8_t" name="onoff">Vanav On(1) Off(0) set value</field>
      *  </message>
     */
-    mavlink_message_t       message;
-    int __systemId = _mavlink->getSystemId();
-    int __componentId = _mavlink->getComponentId();
-    uint8_t __mavlinkChannel = sharedLink->mavlinkChannel();
+    //mavlink_message_t       message;
+    //int __systemId = _mavlink->getSystemId();
+    //int __componentId = _mavlink->getComponentId();
+    //uint8_t __mavlinkChannel = sharedLink->mavlinkChannel();
 
-    // vanav on off switch message size is only 1 byte
-    char buf[1];
-    _mav_put_int8_t(buf, 0, 1);
+    //// vanav on off switch message size is only 1 byte
+    //char buf[1];
+    //_mav_put_int8_t(buf, 0, 1);
 
-    memcpy(_MAV_PAYLOAD_NON_CONST(&message), buf, 1);
+    //memcpy(_MAV_PAYLOAD_NON_CONST(&message), buf, 1);
 
-    message.msgid = 512;
+    //message.msgid = 512;
 
-    uint16_t ms = mavlink_finalize_message_chan(&message,
-                                  __systemId,
-                                  __componentId,
-                                  __mavlinkChannel,
-                                  1,
-                                  1,
-                                  0);
+    //uint16_t ms = mavlink_finalize_message_chan(&message,
+    //                              __systemId,
+    //                              __componentId,
+    //                              __mavlinkChannel,
+    //                              1,
+    //                              1,
+    //                              0);
 
-    sendMessageOnLinkThreadSafe(sharedLink.get(), message);
+    //sendMessageOnLinkThreadSafe(sharedLink.get(), message);
+
+    sendVanavMessageOnLinkThreadSafe(sharedLink.get(), true);
 }
